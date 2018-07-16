@@ -1,0 +1,15 @@
+{
+    "require": {
+        "slim/slim": "^3.0",
+        "slim/twig-view": "^2.4",
+        "monolog/monolog": "^1.23",
+        "slim/php-view": "^2.2",
+        "twbs/bootstrap": "^4.1",
+        "components/jquery": "^3.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "": "classes/"
+        }
+    }
+}

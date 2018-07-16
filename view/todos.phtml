@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Todos</title>
+    <!-- <link href="../vendor/twbs/bootstrap/dist/css/bootstrap.css" rel="stylesheet" type="text/css" /> -->
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Montserrat');
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: center;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        button {
+            padding: 5px 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            background-color: white;
+            color: #a3a3a3;
+            border: 2px solid #a3a3a3;
+            /* border-radius: 10px; */
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+        }
+
+        button:hover {
+            background-color: #a3a3a3;
+            color: white;
+        }
+
+        input {
+            padding: 6px 5px;
+            /* border-radius: 10px; */
+        }
+
+        .cross-todo,
+        .delete-todo {
+            cursor: pointer;
+        }
+
+        /* The Modal (background) */
+
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
+
+        /* Modal Content/Box */
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            /* Could be more or less, depending on screen size */
+        }
+
+        /* The Close Button */
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: -1%;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12" style="width: 99vw">
+                <h1 style="text-align: center">All Todos</h1>
+
+                <table class="pure-table" align="center" border="1" width="100%">
+                    <tr>
+                        <th>Text</th>
+                        <th>Crossed Out</th>
+                        <th>Delete</th>
+                    </tr>
+
+                    <?php foreach ($todos as $todo): ?>
+                    <tr>
+                        <td width="80%">
+                            <div class="todo-text" id="todo-<?=$todo->getId()?>" title="Edit" style="<?=$todo->getCrossedOut() > 0 ? 'text-decoration: line-through;' : ''?>">
+                                <?=$todo->getText()?>
+                            </div>
+                        </td>
+                        <td width="10%">
+                            <form method="POST" action="todos/cross/<?=$todo->getId()?>">
+                                <div class="cross-todo" onClick="javascript:this.parentNode.submit();">&#9998;</div>
+                            </form>
+                        </td>
+                        <td width="10%">
+                            <form method="POST" action="todos/delete/<?=$todo->getId()?>">
+                                <div class="delete-todo" onClick="javascript:this.parentNode.submit();">&times;</div>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach;?>
+                    <tr>
+                        <td colspan="3">
+                            <form method="POST" action="todos/add">
+                                <input type="text" name="new-todo-input">
+                                <button type="submit">Add new todo</button>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <form action="todos/edit" id="modal-form" method="POST" style="display: grid;margin-top: 1%;">
+                            <label for="modal-todo-id">Id: </label>
+                            <input type="text" id="modal-todo-id" name="id" value="0" readonly>
+                            <label for="modal-todo-text">Text: </label>
+                            <input type="text" id="modal-todo-text" name="text">
+                            <button type="submit" style="margin-top: 1%">Edit</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    </div>
+</body>
+<script>
+    var modal = document.getElementById('myModal');
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("close")[0];
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        } else {
+            if (Array.from(document.getElementsByClassName("todo-text")).includes(event.target)) {
+                id = parseInt(event.target.getAttribute('id').split('-')[1]);
+                document.getElementById('modal-todo-id').value = id;
+                // document.getElementById('modal-form').setAttribute('action', `todos/edit/${id}`);
+                modal.style.display = "block";
+            }
+        }
+    }
+</script>
+
+</html>
