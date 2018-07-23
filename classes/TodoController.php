@@ -1,58 +1,45 @@
 <?php
-class TodoController extends DataBase
+
+class TodoController extends BaseController
 {
-    public function getTodos()
+    public function index($request, $response, $args)
     {
-        $sql = "SELECT id, text, crossed_out FROM todos";
-        $stmt = $this->db->query($sql);
-        $results = [];
-        while ($row = $stmt->fetch()) {
-            $results[] = new TodoModel($row);
-        }
-        return $results;
-    }
-
-    public function getTodoById($todo_id)
-    {
-        $sql = "SELECT id, text, crossed_out FROM todos WHERE id = " . intval($todo_id);
-        $stmt = $this->db->query($sql);
-        return new TodoModel($stmt->fetch());
-    }
-
-    public function save($todo)
-    {
-        $sql = "INSERT INTO todos (text, crossed_out) VALUES (:text, :crossed_out)";
-        $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([
-            "text" => $todo->getText(),
-            "crossed_out" => $todo->getCrossedOut(),
+        $todos = TodoModel::all($this->db);
+        return $this->view->render($response, 'todos.phtml', [
+            'todos' => $todos,
+            'router' => $this->router,
         ]);
-        if (!$result) {
-            throw new Exception("could not save record");
-        }
     }
-    public function delete($todo)
+    public function addTodo($request, $response, $args)
     {
-        $sql = "DELETE FROM todos WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([
-            "id" => $todo->getId(),
-        ]);
-        if (!$result) {
-            throw new Exception("could not delete record");
-        }
+        $todo = new TodoModel([
+            'text' => $request->getParsedBody()['new-todo-input'],
+        ], $this->db);
+        $todo->save();
+        return $response->withRedirect('/todos');
     }
-    public function update($todo)
+    public function deleteTodo($request, $response, $args)
     {
-        $sql = "UPDATE todos SET text = :text, crossed_out = :crossed_out WHERE id = :id";
-        $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([
-            "text" => $todo->getText(),
-            "crossed_out" => $todo->getCrossedOut(),
-            "id" => $todo->getId(),
-        ]);
-        if (!$result) {
-            throw new Exception("could not delete record");
+        $todo = TodoModel::one($this->db, $args['id']);
+        $todo->delete();
+        return $response->withRedirect('/todos');
+    }
+    public function crossTodo($request, $response, $args)
+    {
+        $todo = TodoModel::one($this->db, $args['id']);
+        if ($todo->getCrossedOut() < 1) {
+            $todo->setCrossedOut(1);
+        } else {
+            $todo->setCrossedOut(0);
         }
+        $todo->update();
+        return $response->withRedirect('/todos');
+    }
+    public function editTodo($request, $response, $args)
+    {
+        $todo = TodoModel::one($this->db, $request->getParsedBody()['id']);
+        $todo->setText($request->getParsedBody()['text']);
+        $todo->update();
+        return $response->withRedirect('/todos');
     }
 }

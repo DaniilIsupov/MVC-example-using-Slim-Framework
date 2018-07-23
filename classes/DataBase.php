@@ -1,5 +1,5 @@
-
 <?php
+
 abstract class DataBase
 {
     protected $db;
